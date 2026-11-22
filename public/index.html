@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TJ AI control center</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<datalist id="vers"><option value="auto"><option value="26.3"><option value="26.2"><option value="26.1"><option value="1.21.11"><option value="1.21.4"><option value="1.20.4"><option value="1.19.4"><option value="1.18.2"><option value="1.16.5"><option value="1.12.2"><option value="1.8.9"><option value="1.7.10"></datalist>
+<canvas id="bg" aria-hidden="true"></canvas><canvas id="fx" aria-hidden="true"></canvas>
+<div id="toast" role="status"></div>
+<div id="login"><form id="lf" autocomplete="on"><div class="cube big" aria-hidden="true"></div><h1>TJ AI control center</h1><p class="note">Authorized accounts only. Suspicious activity blocks your IP address automatically.</p>
+  <input id="lu" placeholder="Username" autocomplete="username" aria-label="Username" maxlength="32" required>
+  <input id="pw" type="password" placeholder="Password" autocomplete="current-password" aria-label="Password" maxlength="200" required>
+  <input id="hp" class="hp" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
+  <div id="err" role="alert"></div><button class="primary">Log in</button></form></div>
+
+<header class="top" id="top" hidden><div class="brand"><span class="cube"></span>TJ AI</div><div class="pill" id="pill"></div><div class="who"><span id="who"></span><button id="bOut">Log out</button></div></header>
+<div class="wrap" id="app" hidden>
+<aside class="rail"><div class="note vo">View-only account</div>
+  <div class="ring"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="74" fill="none" stroke="#221e2e" stroke-width="12"/><circle id="arc" cx="85" cy="85" r="74" fill="none" stroke="#a35cff" stroke-width="12" stroke-linecap="round" stroke-dasharray="465" stroke-dashoffset="465" style="transition:stroke-dashoffset .6s"/></svg>
+    <div class="num"><span>Level</span><b id="lvl">1</b><span id="xp">0 XP</span></div></div>
+  <h2 id="stageName">Basic Movement</h2>
+  <div class="note" id="toNext"></div>
+  <ol class="ladder" id="ladder"></ol>
+</aside>
+<main>
+  <section class="card"><h3>Right now</h3><div id="now"></div></section>
+  <section class="card"><h3>Server</h3><div id="msa"></div><div id="srv"></div>
+    <div class="btns admin"><button id="bDetect">Detect server</button><button id="bRe">Reconnect bot</button></div></section>
+  <section class="card"><h3>Nearby</h3><div class="list" id="near"></div></section>
+  <section class="card"><h3>Inventory</h3><div class="list" id="inv"></div></section>
+  <section class="card"><h3>What it has learned</h3><div id="learn"></div><div class="list" id="rec" style="margin-top:10px"></div></section>
+  <section class="card"><h3>Mistakes it is learning from</h3><div class="list" id="mis"></div></section>
+  <section class="card wide admin"><h3>Servers</h3>
+    <div class="list" id="servers" style="max-height:none"></div>
+    <div class="sub" id="pfTitle">Add a server</div>
+    <div class="grid2">
+      <label>Name<input id="pfName" placeholder="My survival server" maxlength="40"></label>
+      <label>Address<input id="pfHost" placeholder="play.example.com or IP"></label>
+      <label>Port<input id="pfPort" type="number" value="25565" min="1" max="65535"></label>
+      <label>How to join<select id="pfMode"><option value="">Use default (auto)</option><option value="auto">Auto-detect</option><option value="direct">Direct, Microsoft login</option><option value="viaproxy">ViaProxy (any version)</option></select></label>
+      <label>Server version<input id="pfVer" list="vers" placeholder="auto (or 1.8.9, 1.12.2, 26.2...)"></label>
+    </div>
+    <div class="btns"><button class="primary" id="pfSave">Save server</button><button id="pfCancel" hidden>Cancel edit</button></div>
+    <div class="note" style="margin-top:8px">ViaProxy mode lets the bot join servers from very old versions up to the newest ViaProxy supports. Leave the version on auto unless detection fails.</div>
+  </section>
+  <section class="card admin"><h3>Controls</h3>
+    <div class="inline"><label>Player (for follow / come)<input id="cPlayer" placeholder="your Minecraft name"></label></div>
+    <div class="btns"><button data-act="follow">Follow</button><button data-act="come">Come to me</button><button data-act="attack">Fight nearby</button><button data-act="explore">Explore</button><button data-act="status">Status</button><button data-act="stop">Stop</button></div>
+    <div class="sub">Collect wood, craft, go to</div>
+    <div class="inline"><label>Logs<input id="cLogs" type="number" value="5" min="1" max="32"></label><button id="bWood">Collect</button></div>
+    <div class="inline" style="margin-top:6px"><label>Craft<input id="cItem" value="planks"></label><label>Amount<input id="cCount" type="number" value="4" min="1" max="64"></label><button id="bCraft">Craft</button></div>
+    <div class="inline" style="margin-top:6px"><label>X<input id="gx" type="number"></label><label>Y<input id="gy" type="number"></label><label>Z<input id="gz" type="number"></label><button id="bGo">Go</button></div>
+    <div class="sub">Drive it by hand</div>
+    <div class="pad"><button data-turn="-45" title="Turn left">⟲</button><button data-key="forward">▲</button><button data-turn="45" title="Turn right">⟳</button>
+      <button data-key="left">◀</button><button data-key="jump">Jump</button><button data-key="right">▶</button>
+      <button data-key="sneak">Sneak</button><button data-key="back">▼</button><button data-key="sprint">Sprint</button></div>
+    <div class="sub">Send to Minecraft chat (start with / for a command)</div>
+    <form class="send" id="rf"><input id="ri" maxlength="250" placeholder="Hello! or /gamemode creative" aria-label="Raw chat or command"><button class="primary">Send</button></form>
+  </section>
+  <section class="card admin"><h3>ViaProxy</h3><div id="via"></div>
+    <div class="btns"><button id="bAcct">Add Minecraft account</button></div>
+    <div class="sub">ViaProxy console</div><div id="vlog" style="background:#0a0810;border-radius:10px;padding:8px;height:130px;overflow:auto;font:12px/1.4 ui-monospace,Consolas,monospace;white-space:pre-wrap"></div>
+    <form class="send" id="vf"><input id="vi" placeholder="account list" aria-label="ViaProxy command"><button>Send</button></form>
+  </section>
+  <section class="card wide admin"><h3>Settings</h3>
+    <div class="grid2">
+      <label>Default join mode<select id="sMode"><option value="auto">Auto-detect</option><option value="direct">Direct, Microsoft login</option><option value="viaproxy">ViaProxy (any version)</option></select></label>
+      <label>Default server version<input id="sTarget" list="vers" placeholder="auto"></label>
+      <label>Bot's own version (through ViaProxy)<select id="sClient"></select></label>
+      <label>ViaProxy joins as<select id="sVia"><option value="account">My Minecraft account</option><option value="none">Offline (cracked servers)</option></select></label>
+      <label>ViaProxy account number<input id="sAcct" type="number" min="0" max="49" title="0 is the first account in ViaProxy. Type account list in the ViaProxy console to see them."></label>
+      <label>Bot name (offline / ViaProxy)<input id="sBot" maxlength="16"></label>
+      <label>Microsoft account email (direct mode)<input id="sMs"></label>
+      <label>AI model (OpenRouter)<input id="sModel"></label>
+      <label>OpenRouter API key<input id="sKey" type="password" placeholder="leave empty to keep" autocomplete="off"></label>
+    </div>
+    <div class="btns" style="gap:18px">
+      <label class="check"><input type="checkbox" id="sUnlock">Unlock all abilities</label>
+      <label class="check"><input type="checkbox" id="sDefend">Fight mobs that get close</label>
+      <label class="check"><input type="checkbox" id="sGlance">Look around when idle</label>
+    </div>
+    <div class="btns"><button class="primary" id="sSave">Save settings</button><button id="sClearKey">Remove API key</button><button id="bDis">Leave server</button></div>
+    <div class="note" style="margin-top:8px">Changing mode, versions, name or account makes the bot rejoin the server.</div>
+  </section>
+  <section class="card wide admin"><h3>Accounts</h3>
+    <div class="list" id="users" style="max-height:none"></div>
+    <div class="sub">Add an account (only admins can do this)</div>
+    <div class="grid2">
+      <label>Username<input id="uName" maxlength="32" autocomplete="off"></label>
+      <label>Password (10+ characters)<input id="uPass" type="password" autocomplete="new-password"></label>
+      <label>Role<select id="uRole"><option value="viewer">Viewer (look only)</option><option value="admin">Admin (full control)</option></select></label>
+    </div>
+    <div class="btns"><button class="primary" id="uAdd">Create account</button></div>
+    <div class="sub">Change my password</div>
+    <div class="grid2"><label>Current password<input id="pwCur" type="password" autocomplete="current-password"></label><label>New password<input id="pwNew" type="password" autocomplete="new-password"></label></div>
+    <div class="btns"><button id="myPw">Change my password</button></div>
+  </section>
+  <section class="card wide admin"><h3>Security</h3>
+    <div class="inline"><label class="check"><input type="checkbox" id="sgOn" checked>Anti-bot protection on (blocks suspicious IPs automatically)</label></div>
+    <div class="note" id="sgStat" style="margin:6px 0 10px"></div>
+    <div class="sub">Blocked IP addresses</div><div class="list" id="blocked"></div>
+    <div class="inline" style="margin-top:10px"><label>Block an IP by hand<input id="sgIp" placeholder="203.0.113.7"></label><label>Hours<input id="sgHrs" type="number" value="24" min="1" max="8760"></label><button id="sgBlock">Block</button></div>
+    <div class="sub">Recent security events</div><div class="list" id="events"></div>
+  </section>
+  <section class="card wide"><h3>Console</h3><div id="log" role="log"></div>
+    <form class="send admin" id="cf"><input id="ci" placeholder='Talk to it, e.g. "collect 5 logs" or "status"' maxlength="200" aria-label="Message to the AI"><button class="primary">Send</button><button type="button" id="bStop">Stop task</button></form>
+    <div class="note" id="brainNote" style="margin-top:8px"></div></section>
+</main>
+</div>
+
+<script src="/app.js" defer></script>
+</body>
+</html>
